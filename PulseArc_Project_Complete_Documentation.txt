@@ -1,0 +1,1390 @@
+================================================================================
+                    PULSEARC (PULSELINK) PROJECT DOCUMENTATION
+                          Complete Technical Reference
+                              Version 2.0.0
+================================================================================
+
+Created: 2025-12-07
+Last Updated: 2025-12-07
+Documentation Scope: Full Stack Analysis - Frontend + Backend
+
+================================================================================
+TABLE OF CONTENTS
+================================================================================
+
+1.  PROJECT OVERVIEW
+2.  TECHNOLOGY STACK
+3.  PROJECT STRUCTURE
+4.  UI & UX EFFECTS (Complete Animation Catalog)
+5.  THEME SYSTEM (Design Tokens & Multi-Theme Architecture)
+6.  COMPONENT ARCHITECTURE (All 46 Components)
+7.  STATE MANAGEMENT (Zustand Stores)
+8.  SERVICES & LOGIC (API, WebSocket)
+9.  BACKEND STRUCTURE (FastAPI, SQLAlchemy)
+10. ACCESS CONTROL (Role-Based Permissions)
+11. END-TO-END FLOWS
+12. MICRO-DETAILS CATALOG
+
+================================================================================
+1. PROJECT OVERVIEW
+================================================================================
+
+PulseArc (formerly PulseConnect, rebranded to PulseLink) is a real-time campus
+alert broadcasting system designed for educational institutions. It enables
+role-based alert creation, delivery, acknowledgment tracking, and analytics.
+
+KEY FEATURES:
+- Real-time WebSocket alert broadcasting with role-based targeting
+- 4-tier role system: Super Admin, College Admin, Faculty, Student
+- Multi-theme system with 7+ predefined themes and custom theme support
+- VisionOS-inspired glassmorphism UI with liquid-glass effects
+- Gamified badge system for user engagement
+- Emergency mode with visual effects (shake, glow, pulse)
+- Interactive particle background with cursor gravity
+- Settings cloud sync with conflict resolution
+- Incident timeline tracking for alert accountability
+
+================================================================================
+2. TECHNOLOGY STACK
+================================================================================
+
+FRONTEND:
+---------
+- React 18+ with functional components and hooks
+- Vite as build tool (dev server on port 5173)
+- React Router v6 for routing
+- Framer Motion for animations
+- Zustand for state management
+- Axios for HTTP requests
+- react-hot-toast for notifications
+- confetti-js for celebration effects
+- ReactQuill for rich text editing
+
+BACKEND:
+--------
+- FastAPI (Python) on port 8000
+- SQLAlchemy ORM with SQLite database
+- Pydantic for request/response models
+- FastAPI WebSocket for real-time communication
+- SlowAPI for rate limiting
+- PassLib for password hashing
+- PyJWT for JWT token generation
+
+DATABASE:
+---------
+- SQLite (pulseconnect.db / campus_alerts.db)
+- 10 tables: users, alerts, reactions, alert_views, alert_acknowledgments,
+  user_preferences, alert_templates, user_badges, activity_logs
+
+================================================================================
+3. PROJECT STRUCTURE
+================================================================================
+
+pulseconnect5/
+├── frontend/
+│   ├── src/
+│   │   ├── App.jsx                    # Main app with routing
+│   │   ├── main.jsx                   # React entry point
+│   │   ├── index.css                  # Global styles (30KB+)
+│   │   ├── animations/                # Animation presets (2 files)
+│   │   ├── components/                # 46 React components
+│   │   │   ├── AlertCard.jsx          # Alert display with reactions
+│   │   │   ├── AmbientMotion.jsx      # Particle background system
+│   │   │   ├── Card.jsx               # Theme-aware card container
+│   │   │   ├── Navbar.jsx             # Navigation with user menu
+│   │   │   ├── LiquidGlass.jsx        # VisionOS glass component
+│   │   │   ├── DynamicBanner.jsx      # Status banner component
+│   │   │   └── ... (40+ more)
+│   │   ├── hooks/                     # 7 custom hooks
+│   │   │   ├── useAppSettings.js      # Settings helper hook
+│   │   │   └── useLiquidGlass.js      # Glass effect hook
+│   │   ├── pages/                     # 12 page components
+│   │   │   ├── Dashboard.jsx          # Main alert feed
+│   │   │   ├── CreateAlert.jsx        # Alert creation form
+│   │   │   ├── Settings.jsx           # User preferences (71KB)
+│   │   │   └── ... (9 more)
+│   │   ├── services/                  # API & WebSocket
+│   │   │   ├── api.js                 # Axios instance
+│   │   │   └── websocket.js           # WebSocket manager
+│   │   ├── store/                     # 5 Zustand stores
+│   │   │   ├── alertStore.js          # Alert state
+│   │   │   ├── authStore.js           # Authentication
+│   │   │   ├── themeStore.js          # Theme state
+│   │   │   ├── settingsStore.js       # User settings
+│   │   │   └── emergencyStore.js      # Emergency mode
+│   │   └── styles/                    # 12 CSS files
+│   │       ├── theme-tokens.css       # Design tokens (30KB)
+│   │       ├── liquid-glass.css       # Glass effects (12KB)
+│   │       ├── animations.css         # Keyframe animations
+│   │       └── ... (9 more)
+│   └── public/
+│       └── svgs/liquid-filter.svg     # SVG displacement filter
+├── backend/
+│   ├── main.py                        # FastAPI app + auth routes
+│   ├── models.py                      # SQLAlchemy models
+│   ├── database.py                    # DB connection
+│   ├── auth.py                        # JWT + password utils
+│   ├── websocket_manager.py           # WS connection handler
+│   ├── seed.py                        # Database seeding
+│   └── routes/                        # 13 route modules
+│       ├── alerts.py                  # Alert CRUD + targeting
+│       ├── users.py                   # User management
+│       ├── reactions.py               # Emoji reactions
+│       ├── acknowledgments.py         # Alert acknowledgment
+│       └── ... (9 more)
+└── docs/
+    ├── pulsearc-glass-upgrade.md      # Glass system docs
+    └── liquid-glass-qa-report.json    # QA report
+
+================================================================================
+4. UI & UX EFFECTS (COMPLETE ANIMATION CATALOG)
+================================================================================
+
+4.1 FRAMER MOTION ANIMATIONS
+-----------------------------
+
+TRANSITION PRESETS:
+- Spring: stiffness: 300, damping: 20 (configurable via animationSpeed)
+- Ease: cubic-bezier(0.16, 1, 0.3, 1) - default
+- Smooth: cubic-bezier(0.22, 1, 0.36, 1)
+- Inertia: cubic-bezier(0.25, 0.46, 0.45, 0.94)
+
+BUTTON ANIMATIONS:
+- whileHover: { scale: 1.02 }
+- whileTap: { scale: 0.98 }
+- Duration: 200ms with spring ease
+
+CARD HOVER EFFECTS:
+- Light theme: translateY(-2px), shadow-soft-lg
+- Dark theme: neon glow ring, translateY(-4px)
+- Glass theme: background opacity increase, border glow
+- Neo theme: neumorphic shadow depth increase
+
+PAGE TRANSITIONS:
+- AnimatePresence with mode="wait"
+- Entry: opacity 0→1, y: 10→0, duration: 300ms
+- Exit: opacity 1→0, duration: 200ms
+
+4.2 ALERT PRIORITY ANIMATIONS (animations.css)
+-----------------------------------------------
+
+EMERGENCY (🚨):
+- Animation: emergency-pulse
+- Keyframes: scale 1→1.002→1, bg-color transparent→rgba(239,68,68,0.08)
+- Duration: 2s ease-in-out, 2 iterations only
+- Border: 4px solid rgb(239, 68, 68)
+
+IMPORTANT (⚠️):
+- Animation: amber-ripple
+- Keyframes: box-shadow 0→8px spread→0
+- Color: rgba(251, 191, 36, 0.4)
+- Duration: 2.5s ease-in-out, infinite
+
+INFO (ℹ️):
+- Animation: info-fade
+- Keyframes: opacity 0→1, translateY -8px→0
+- Duration: 0.6s cubic-bezier(0.4, 0, 0.2, 1)
+
+REMINDER (⏰):
+- Animation: reminder-breathe
+- Keyframes: opacity 1→0.85→1
+- Duration: 3s ease-in-out, infinite
+
+4.3 EMERGENCY MODE VISUAL EFFECTS
+----------------------------------
+
+SHAKE ANIMATION (getShakeAnimation):
+- Basic: x: [0, -3, 3, -3, 3, 0], duration: 0.4s
+- Enhanced: x: [0, -5, 5, -5, 5, 0], duration: 0.4s
+- Cinematic: x: [0, -8, 8, -8, 8, 0], duration: 0.4s
+
+PULSE EFFECT (emergency alerts):
+- scale: [1, 1.05, 1], opacity: [0.3, 0.6, 0.3]
+- Duration: 2s, repeat: Infinity
+- Background: bg-red-500/20
+
+EMERGENCY VISUAL CONFIG:
+- Basic: glowIntensity 0.3, overlayOpacity 0.1, pulseScale 1.02
+- Enhanced: glowIntensity 0.5, overlayOpacity 0.2, pulseScale 1.05
+- Cinematic: glowIntensity 0.8, overlayOpacity 0.3, pulseScale 1.08
+
+4.4 PARTICLE SYSTEM (AmbientMotion.jsx)
+----------------------------------------
+
+PARTICLE PHYSICS:
+- Interactive particles: 80 on Welcome/Login, 30 on other pages
+- Static particles: 120 on Welcome/Login, 50 on other pages
+- Size range: 1.5-2.5px
+- Opacity: 0.6-1.0 (interactive: 0.8-1.0)
+
+PHYSICS MULTIPLIERS:
+- off: 0 (no cursor interaction)
+- soft: 0.3
+- medium: 0.6
+- strong: 1.0
+
+CURSOR GRAVITY:
+- Repel zone: < 180px, force = (180 - distance) / (distance² * 0.02)
+- Attract zone: 180-400px, force = (distance - 180) * 0.0009
+- Friction: 0.96 per frame
+- Gravity: 0.008 downward
+
+COLOR PALETTES (per theme):
+- Default: Purple, Deep Purple, Violet, Blue Violet, Indigo, Light Purple
+- Aurora: Cyan, Teal, Pink, Purple, Indigo, Sky
+- Serenity: Emerald, Green, Mint, Light Green, Teal, Aqua
+- Cyber: Pink, Purple, Orange, Hot Pink, Cyan, Deep Magenta
+- Royal: Gold variations (6 shades)
+- Festival: Orange, Pink, Purple, Blue, Teal, Yellow
+
+PARTICLE RENDERING:
+- CSS: radial-gradient with glow box-shadow
+- Transform: translate3d for GPU acceleration
+- FPS: 30 (throttled via requestAnimationFrame)
+
+4.5 LIQUID-GLASS EFFECTS (liquid-glass.css)
+--------------------------------------------
+
+BASE GLASS PROPERTIES:
+- Background: var(--glass-bg, rgba(255, 255, 255, 0.60))
+- Backdrop-filter: blur(18px) saturate(140%)
+- Border-radius: 18px
+- Border: 1px solid rgba(255, 255, 255, 0.14)
+
+LAYERED EFFECTS:
+1. Inner shadow layer (::before):
+   - box-shadow: inset 0 1px 0 0 rgba(255,255,255,0.55),
+                 inset 0 -1px 2px 0 rgba(0,0,0,0.07)
+   - mix-blend-mode: multiply
+   - z-index: 1
+
+2. Specular highlight layer (::after):
+   - radial-gradient at 30% 20%
+   - opacity: 0.08 (0.15 on hover)
+   - transform: rotate(-15deg)
+   - filter: blur(20px)
+   - z-index: 2
+
+3. Noise overlay (.glass-noise):
+   - background-image: url('/assets/noise-8.png')
+   - opacity: 0.04 (0.06 in dark mode)
+   - mix-blend-mode: overlay
+   - z-index: 3
+
+4. Content layer (.glass-content):
+   - z-index: 4
+
+HOVER STATE:
+- transform: translateY(-4px) scale(1.02)
+- box-shadow: 0 8px 32px rgba(0,0,0,0.12)
+- Duration: 280ms cubic-bezier(0.34, 1.56, 0.64, 1)
+
+SIZE VARIANTS:
+- liquid-glass-sm: radius 12px, blur 12px
+- liquid-glass-lg: radius 24px, blur 24px
+- liquid-glass-xl: radius 32px, blur 32px
+
+SVG DISPLACEMENT FILTER:
+- File: /public/svgs/liquid-filter.svg
+- feTurbulence: type="fractalNoise", baseFrequency="0.012"
+- feDisplacementMap: scale="10"
+- Controllable via liquidFilter.js utility
+
+4.6 REACTION ANIMATIONS (useAppSettings.js)
+---------------------------------------------
+
+REACTION STYLES:
+- none: {} (no animation)
+- soft: scale [1, 1.05, 1], duration 0.2s
+- bounce: scale [1, 1.2, 0.9, 1.1, 1], type 'spring', duration 0.4s
+- confetti: scale [1, 1.3, 1], rotate [0, 10, -10, 0], duration 0.5s
+
+REACTION FLOAT (CSS):
+- animation: reaction-float 0.8s forwards
+- Keyframes: translateY 0→-40px, scale 1→1.2, opacity 1→0
+
+4.7 NOTIFICATION ANIMATIONS
+----------------------------
+
+SLIDE-DOWN (iOS style):
+- animation: notification-slide-down 0.4s
+- Keyframes: translateY -100%→0, opacity 0→1
+
+TOAST CONFIG (react-hot-toast):
+- Position: top-right
+- Top offset: 80px (below navbar)
+- Gutter: 12px
+- Duration: 2000ms
+- Border-radius: 12px
+- Box-shadow: 0 4px 20px rgba(0,0,0,0.1)
+
+================================================================================
+5. THEME SYSTEM (DESIGN TOKENS & MULTI-THEME ARCHITECTURE)
+================================================================================
+
+5.1 DESIGN TOKEN CATEGORIES (theme-tokens.css)
+-----------------------------------------------
+
+ACCENT COLORS (consistent across themes):
+- --accent-primary: #a855f7
+- --accent-primary-light: #c084fc
+- --accent-primary-dark: #7c3aed
+- --accent-primary-subtle: rgba(168, 85, 247, 0.1)
+- --accent-primary-glow: rgba(168, 85, 247, 0.4)
+
+EMERGENCY/SEVERITY COLORS:
+- Emergency: #ef4444 (red)
+- Important: #f59e0b (amber)
+- Info: #3b82f6 (blue)
+- Success: #22c55e (green)
+- Each has: color, bg, border, glow, pulse variants
+
+SHAPE/RADIUS TOKENS:
+- --radius-xs: 4px
+- --radius-sm: 8px
+- --radius-md: 12px
+- --radius-lg: 16px
+- --radius-xl: 20px
+- --radius-2xl: 24px
+- --radius-3xl: 32px
+- --radius-full: 9999px
+
+MOTION TOKENS:
+- --motion-duration-instant: 100ms
+- --motion-duration-fast: 150ms
+- --motion-duration-normal: 200ms
+- --motion-duration-slow: 300ms
+- --motion-duration-slower: 400ms
+- --motion-duration-theme: 350ms
+
+EASING FUNCTIONS:
+- --motion-ease-default: cubic-bezier(0.16, 1, 0.3, 1)
+- --motion-ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1)
+- --motion-ease-smooth: cubic-bezier(0.22, 1, 0.36, 1)
+- --motion-ease-inertia: cubic-bezier(0.25, 0.46, 0.45, 0.94)
+
+BLUR TOKENS:
+- --blur-sm: blur(4px)
+- --blur-md: blur(8px)
+- --blur-lg: blur(16px)
+- --blur-xl: blur(24px)
+- --blur-2xl: blur(32px)
+- --blur-3xl: blur(48px)
+
+BACKDROP TOKENS:
+- --backdrop-standard: blur(16px) saturate(180%)
+- --backdrop-heavy: blur(24px) saturate(200%)
+- --backdrop-glass: blur(32px) saturate(200%)
+- --backdrop-visionos: blur(40px) saturate(180%) brightness(1.05)
+
+Z-INDEX LAYERS:
+- --z-base: 0
+- --z-dropdown: 10
+- --z-sticky: 20
+- --z-fixed: 30
+- --z-modal-backdrop: 40
+- --z-modal: 50
+- --z-popover: 60
+- --z-tooltip: 70
+- --z-notification: 80
+- --z-emergency: 100
+
+SPACING SCALE (8px grid):
+- --space-1: 4px through --space-16: 64px
+
+TYPOGRAPHY:
+- Font family: -apple-system, BlinkMacSystemFont, 'SF Pro Display'
+- Font sizes: 0.75rem (xs) to 2.25rem (4xl)
+- Font weights: 400 (normal) to 700 (bold)
+
+5.2 THEME DEFINITIONS (themeStore.js)
+--------------------------------------
+
+LIGHT THEME:
+- bg: bg-white
+- text: text-neutral-900
+- textStyle: { color: '#111827' }
+- card: bg-white border border-neutral-200/60
+- navbar: bg-white/80 backdrop-blur-xl
+- buttonOutline: border-2 border-neutral-300 bg-white
+
+DARK THEME:
+- bg: bg-neutral-950
+- text: text-white
+- textStyle: { color: '#ffffff' }
+- card: bg-neutral-900 border border-neutral-800
+- navbar: bg-neutral-900/80 backdrop-blur-xl
+- Accent neon: #7A5CFF (electric violet)
+- Accent cyan: #4CEAFF
+
+GLASS THEME:
+- bg: gradient from-neutral-50 via-white to-neutral-100
+- Surface: rgba(255, 255, 255, 0.18)
+- VisionOS-inspired depth layers
+- Text padding: rgba(255, 255, 255, 0.25)
+- Border: glass-line effect 1.5px
+
+NEO THEME (Neumorphism):
+- bg: gradient from-neutral-100 via-neutral-50
+- card shadow: [8px_8px_16px_#d1d5db,-8px_-8px_16px_#ffffff]
+- hover shadow: [12px_12px_24px_#d1d5db,-12px_-12px_24px_#ffffff]
+
+5.3 SETTINGS STORE THEMES (settingsStore.js)
+----------------------------------------------
+
+PREDEFINED THEMES (7):
+1. default - Clean, balanced interface
+2. waterGlass - Liquid transparency (#0ea5e9 accent)
+3. luxury - Premium gold (#d4af37 accent)
+4. space - Deep cosmic (#818cf8 accent)
+5. minimalWhite - Ultra-clean (#374151 accent)
+6. natureCalm - Organic earth (#059669 accent)
+7. darkStealth - Pure darkness (#ef4444 accent) [HIDDEN]
+
+THEME STRUCTURE:
+{
+  name: string,
+  description: string,
+  preview: gradient CSS,
+  accent: hex color,
+  background: hex color,
+  text: hex color,
+  glass: rgba color
+}
+
+CUSTOM THEME TEMPLATE:
+{
+  name: 'My Theme',
+  primaryColor: '#a855f7',
+  accentGlow: '#8b5cf6',
+  typography: 'sans',
+  backgroundTexture: 'clean',
+  buttonStyle: 'softGlass',
+  motionIntensity: 0.5,
+  notificationAnimation: 'slide'
+}
+
+5.4 THEME SWITCHING MECHANISM
+------------------------------
+
+1. themeStore.setTheme(themeName) called
+2. localStorage.setItem('theme', themeName)
+3. applyThemeToDOM():
+   - document.documentElement.setAttribute('data-theme', cssTheme)
+   - document.body.setAttribute('data-theme', cssTheme)
+   - 'data-theme-transitioning' attribute set for 350ms
+4. CSS variables resolve via [data-theme="X"] selectors
+5. Components re-render with new theme object from store
+
+================================================================================
+6. COMPONENT ARCHITECTURE (ALL 46 COMPONENTS)
+================================================================================
+
+6.1 CORE LAYOUT COMPONENTS
+---------------------------
+
+App.jsx (304 lines):
+- BrowserRouter with AnimatePresence
+- SpatialModeProvider context
+- AmbientMotion particle system
+- LiquidThemeSelector (when authenticated)
+- OnboardingModal (first login)
+- 14 routes with ProtectedRoute guards
+- Toaster for notifications
+- Theme application via useEffect hooks
+
+Navbar.jsx (24KB):
+- Responsive navigation
+- User dropdown with GradientAvatar
+- Role-based menu items
+- Theme cycle button
+- Mobile hamburger menu
+- Active route indicator
+- Notification badge (pending for admin)
+
+Card.jsx:
+- Theme-aware container
+- Neo (neumorphic) shadows computed
+- Glass, dark, light variants
+- whileHover animations
+- perspective for 3D themes
+
+6.2 ALERT COMPONENTS
+---------------------
+
+AlertCard.jsx (249 lines):
+Props: alert, selectable, isSelected, onSelect
+State: showReactions, acknowledged, showTimeline, reactionAnimating
+Features:
+- Priority-based styling and icons
+- Emoji reaction system (5 emojis: 👍, 🔥, ❗, ❤️, 😢)
+- Acknowledge button for emergency alerts
+- View Timeline button (admin/faculty only)
+- Emergency pulse effect (Framer Motion)
+- Category badge integration
+- Effectiveness score display
+
+AlertCardSkeleton.jsx:
+- Loading placeholder with shimmer
+- Matches AlertCard dimensions
+
+AlertDetailPanel.jsx:
+- Full alert view in modal/drawer
+- Timeline integration
+- Reaction details
+
+BulkDeleteModal.jsx:
+- Multi-select alert deletion
+- Confirmation dialog
+- Undo functionality
+
+CategoryBadge.jsx:
+- Colored badges per category
+- Emergency, Academic, Event, Maintenance, Weather, General
+
+EffectivenessScore.jsx:
+- 0-100 score visualization
+- Color gradient based on score
+
+IncidentTimeline.jsx (18KB):
+- Fetches /api/timeline/alert/{id}
+- Shows: creation, views, reactions, acknowledgments
+- SVG timeline visualization
+- Admin/faculty only
+
+6.3 UI EFFECT COMPONENTS
+-------------------------
+
+AmbientMotion.jsx (318 lines):
+- Canvas-based particle system
+- 6 color themes
+- Cursor gravity physics
+- Interactive/static particle types
+- 30 FPS throttled animation loop
+- Responds to settings: cursorGravity, parallaxBackground, physicsStrength
+
+LiquidGlass.jsx:
+- VisionOS glass surface wrapper
+- Uses useLiquidGlass hook for 3D tilt
+- Size variants: sm, default, lg, xl
+- Accent color support
+- LiquidCard for lightweight version
+- MotionLiquidGlass for Framer Motion
+
+LiquidThemeSelector.jsx:
+- Floating theme picker
+- 7 preset themes
+- Custom theme creation
+- Liquid-glass styled selector
+
+CriticalEmergencyOverlay.jsx:
+- Full-screen red overlay
+- Pulsing animation
+- Dismiss button
+- Sound integration
+
+EmergencyAlertEnhancements.jsx:
+- Additional emergency effects
+- Screen shake
+- Red glow borders
+
+MagneticButton.jsx:
+- Cursor-following magnetic effect
+- Spring animation on hover
+
+MagneticCursor.jsx:
+- Custom cursor following
+- Scale on interactive elements
+
+PremiumBackground.jsx:
+- Gradient backgrounds
+- Optional blur overlay
+
+6.4 FORM COMPONENTS
+--------------------
+
+Input.jsx:
+- Label with required indicator
+- Error message display
+- Theme-aware styling
+- Focus ring animation
+
+Button.jsx:
+- Variants: primary, outline, ghost
+- Disabled state
+- Framer Motion scale effects
+
+RichTextEditor.jsx:
+- ReactQuill wrapper
+- Custom toolbar: headers, formatting, lists, colors, links
+- Snow theme with rounded corners
+
+TemplateSelector.jsx:
+- Fetches /api/templates
+- Dropdown selector
+- Auto-fills form with template
+
+SearchBar.jsx:
+- Real-time search input
+- Debounced queries
+- Clear button
+- Focus animations
+
+AdvancedFilters.jsx:
+- Priority filter
+- Category filter
+- Date range picker
+- Clear all button
+
+6.5 AVATAR COMPONENTS
+----------------------
+
+GradientAvatar.jsx:
+- 5 gradient presets: aurora, sunset, ocean, neon, plum
+- Role-based icon overlay
+- Size variants: sm, md, lg, xl
+- GradientAvatarPicker for selection
+- Theme-adaptive colors
+
+RoleIcon.jsx:
+- 4 SVG icons:
+  - Crown (super_admin)
+  - Shield (college_admin)
+  - Pen (faculty)
+  - Book (student)
+- Theme-adaptive fill colors
+
+6.6 NOTIFICATION COMPONENTS
+----------------------------
+
+NotificationQueue.jsx:
+- Queued alert display
+- Slide-in animation
+- Auto-dismiss
+- Stack management
+
+OnboardingModal.jsx:
+- First-login tutorial
+- Step-by-step guide
+- Welcome message
+- Settings introduction
+
+6.7 SPECIALIZED COMPONENTS
+---------------------------
+
+DynamicBanner.jsx:
+- Status bar at top
+- Emergency mode indicator
+- Connection status
+- Customizable colors
+
+PanicButton.jsx:
+- Emergency alert trigger
+- Hold-to-send mechanism
+- Visual feedback
+- Confirmation dialog
+
+BadgeCollection.jsx:
+- Displays earned badges
+- Shimmer on new badges
+- Badge descriptions
+
+BadgeDisplay.jsx:
+- Single badge view
+- Tooltip with info
+
+SpatialModeProvider.jsx:
+- VisionOS spatial mode context
+- Depth and parallax controls
+- Provider wrapper
+
+PreferencesPanel.jsx:
+- Quick settings access
+- Toggle switches
+- Slider controls
+
+ThemeEditor.jsx (29KB):
+- Full theme customization
+- Color pickers
+- Preview live updates
+- Export/import themes
+
+ThemePreview.jsx:
+- Real-time theme preview
+- Sample UI elements
+- Before/after comparison
+
+SettingsPreviewPane.jsx:
+- Settings page preview component
+- Live preview of changes
+
+PreviewContainer.jsx/PreviewContent.jsx:
+- Settings preview infrastructure
+- Sample content rendering
+
+6.8 UTILITY COMPONENTS
+-----------------------
+
+ProtectedRoute.jsx:
+- Route guard
+- Role-based access
+- Redirects unauthorized
+
+AnimatedCounter.jsx:
+- Number animation
+- Spring interpolation
+
+SplitViewToggle.jsx:
+- Layout mode toggle
+- Standard/split view
+
+================================================================================
+7. STATE MANAGEMENT (ZUSTAND STORES)
+================================================================================
+
+7.1 authStore.js (119 lines)
+-----------------------------
+
+STATE:
+- user: { id, username, email, role, full_name, department, year, section, phone, is_active, first_login }
+- token: JWT string
+- isAuthenticated: boolean
+
+ACTIONS:
+- login(username, password): POST /api/auth/login
+  - Handles pending_approval (403 with specific error)
+  - Stores token and user in localStorage
+  - Connects WebSocket
+  - Returns { success, first_login } or { success: false, error, isPendingApproval }
+
+- logout(): Clears storage, disconnects WebSocket
+
+- hasRole(roles): Checks if user has required role
+
+- updateUser(updates): Merges updates into user object
+
+- refreshUser(): GET /users/me - refreshes user data from server
+
+- verifyToken(): Validates token on app load, logs out if invalid
+
+PERSISTENCE: localStorage (token, user JSON)
+
+7.2 alertStore.js (167 lines)
+------------------------------
+
+STATE:
+- alerts: Alert[]
+- loading: boolean
+- queuedAlerts: Alert[] (for animations)
+
+ACTIONS:
+- fetchAlerts(params): GET /alerts with optional filters
+- createAlert(alertData): POST /alerts
+- addAlert(alert): Add to both alerts and queuedAlerts
+- removeFromQueue(alertId): Remove from animation queue
+- updateReactionCounts(alertId, counts): Update reaction counts
+- addReaction(alertId, emoji): POST /reactions
+- markAsViewed(alertId): POST /alerts/{id}/view
+- updateAcknowledgmentCount(alertId, count): Update ack count
+- removeAlert(alertId): Remove from both lists
+- bulkDeleteAlerts(alertIds): POST /alerts/bulk-delete
+- bulkRestoreAlerts(alertIds): POST /alerts/bulk-restore
+
+WEBSOCKET INTEGRATION:
+- initWebSocket(): Registers listener for:
+  - new_alert → addAlert
+  - reaction_update → updateReactionCounts
+  - acknowledgment_update → updateAcknowledgmentCount
+  - alert_deleted → removeAlert
+- cleanupWebSocket(): Removes listener
+
+7.3 themeStore.js (178 lines)
+------------------------------
+
+STATE:
+- currentTheme: 'light' | 'dark' | 'glass' | 'neo'
+- currentAccent: 'purple' | 'blue' | 'emerald' | 'rose'
+- theme: Theme object with classes
+- accentColor: { name, primary, light, dark }
+
+ACTIONS:
+- setTheme(themeName): Updates theme with DOM animation
+- cycleTheme(): Cycles through theme order
+- setAccent(accentName): Updates accent color
+- getAccentColors(): Returns accent options
+
+ACCENT COLORS:
+- purple: #A855F7 / #C084FC / #7E22CE
+- blue: #3B82F6 / #60A5FA / #1D4ED8
+- emerald: #10B981 / #34D399 / #047857
+- rose: #F43F5E / #FB7185 / #BE123C
+
+PERSISTENCE: localStorage (theme, accent)
+
+DOM APPLICATION:
+- Sets data-theme attribute on html and body
+- Adds/removes theme-transitioning class for 350ms
+
+7.4 settingsStore.js (450 lines)
+---------------------------------
+
+STATE:
+- Theme & Appearance: theme, themePreview, customThemes, avatarGradient
+- Motion: cursorGravity, physicsStrength, parallaxBackground, animationSpeed, hapticFeedback
+- Sound: interfaceSounds, soundStyle, loginSound, notificationVolume
+- Alert Experience: emergencyVisualMode, notificationPopups, urgentShake, reactionAnimation, reducedEmergencyMotion, silentEmergencyMode, autoAcknowledgeOnOpen
+- Dashboard Layout: layoutMode, splitViewEnabled, autoCollapseSidebar
+- Spatial Mode: spatialModeEnabled, spatialMotionIntensity, spatialDepthBlur, spatialParallax
+- Sync: syncStatus, lastSynced, isLoggedIn, conflictData
+
+ACTIONS:
+- initSettings(isLoggedIn): Load from localStorage, then sync from server
+- syncFromServer(): GET /settings/sync/
+- syncToServer(): POST /settings/sync/
+- resolveConflict(useServer): Handle sync conflicts
+- updateSetting(key, value): Update single setting with debounced sync
+- updateSettings(updates): Update multiple settings
+- previewTheme(themeName): Set preview without applying
+- applyPreviewedTheme(): Apply previewed theme
+- cancelPreview(): Cancel preview
+- createCustomTheme(name, data): Create new custom theme
+- updateCustomTheme(id, updates): Modify custom theme
+- duplicateCustomTheme(id): Clone theme
+- deleteCustomTheme(id): Remove theme
+- exportTheme(id): Export as JSON
+- importTheme(json): Import from JSON
+- resetAllSettings(): Reset to defaults
+- exportSettings(): Export all as JSON
+- importSettings(json): Import all from JSON
+- getActiveTheme(): Get current theme config
+- getAllThemes(): Get all themes including custom
+
+PERSISTENCE: localStorage (pulseconnect_settings)
+
+7.5 emergencyStore.js
+----------------------
+
+STATE:
+- emergencyMode: boolean
+- activeEmergencyAlerts: Alert[]
+- overlayDismissed: boolean
+
+ACTIONS:
+- activateEmergency(alert): Set emergency mode
+- deactivateEmergency(): Clear emergency mode
+- dismissOverlay(): Hide emergency overlay
+
+================================================================================
+8. SERVICES & LOGIC
+================================================================================
+
+8.1 api.js (33 lines)
+----------------------
+
+CONFIGURATION:
+- baseURL: 'http://localhost:8000/api'
+- Content-Type: 'application/json'
+
+REQUEST INTERCEPTOR:
+- Adds Authorization header with Bearer token from localStorage
+
+RESPONSE INTERCEPTOR:
+- On 401: Clears localStorage, redirects to '/'
+
+8.2 websocket.js (129 lines)
+-----------------------------
+
+CLASS: WebSocketService
+
+PROPERTIES:
+- ws: WebSocket instance
+- listeners: callback[]
+- reconnectAttempts: number (max 5)
+- reconnectDelay: 1000ms (exponential backoff)
+- isConnecting: boolean
+
+METHODS:
+- connect(): Establishes connection to ws://localhost:8000/ws/{userId}?token={token}
+- disconnect(): Closes with code 1000
+- addListener(callback): Register message handler
+- removeListener(callback): Unregister handler
+- send(data): Send JSON message
+
+RECONNECTION LOGIC:
+- On close (not code 1000): Attempts reconnect
+- Delay doubles each attempt: 1s, 2s, 4s, 8s, 16s
+- Max 5 attempts before giving up
+
+MESSAGE HANDLING:
+- Parses JSON from event.data
+- Notifies all registered listeners
+- Logs errors per listener
+
+================================================================================
+9. BACKEND STRUCTURE
+================================================================================
+
+9.1 DATABASE MODELS (models.py)
+--------------------------------
+
+ENUMS:
+- UserRole: SUPER_ADMIN, COLLEGE_ADMIN, FACULTY, STUDENT
+- AlertPriority: EMERGENCY, IMPORTANT, INFO, REMINDER
+- AlertCategory: EMERGENCY, ACADEMIC, EVENT, MAINTENANCE, WEATHER, GENERAL
+- ActivityType: LOGIN, LOGOUT, CREATE_ALERT, CREATE_USER, UPDATE_USER, DELETE_USER, RESET_PASSWORD, UPDATE_PROFILE
+- BadgeType: FAST_RESPONDER, PRECISION_REPORTER, COMMUNITY_HELPER, CRISIS_GUARDIAN, PRIORITY_SUPPORTER
+
+USER MODEL:
+- id: Integer PK
+- username: String UNIQUE
+- email: String UNIQUE (nullable)
+- password_hash: String
+- role: Enum(UserRole)
+- full_name: String
+- department, year, section, phone, gender: String (nullable)
+- is_active: Boolean (default True)
+- is_approved: Boolean (default False) - for signup approval
+- first_login: Boolean (default True)
+- created_at, last_login_at: DateTime
+- settings_json: String - for cloud sync
+
+ALERT MODEL:
+- id: Integer PK
+- title, message: String
+- priority: Enum(AlertPriority)
+- category: Enum(AlertCategory)
+- sender_id: FK(users.id)
+- created_at: DateTime
+- is_active: Boolean
+- target_roles: String (JSON array)
+- effectiveness_score: Float
+
+REACTION MODEL:
+- id, alert_id, user_id, emoji, created_at
+
+ALERT_VIEW MODEL:
+- id, alert_id, user_id, viewed_at
+
+ALERT_ACKNOWLEDGMENT MODEL:
+- id, alert_id, user_id, acknowledged_at
+
+USER_PREFERENCES MODEL:
+- id, user_id, mute_* flags, quiet_hours settings
+
+ALERT_TEMPLATE MODEL:
+- id, name, title, message, priority, category, created_by_id, created_at, is_active
+
+USER_BADGE MODEL:
+- id, user_id, badge_type, earned_at, is_new
+
+ACTIVITY_LOG MODEL:
+- id, user_id, activity_type, description, ip_address, created_at, extra_data
+
+9.2 AUTHENTICATION (auth.py)
+-----------------------------
+
+FUNCTIONS:
+- verify_password(plain, hashed): bcrypt verification
+- get_password_hash(password): bcrypt hashing
+- create_access_token(data): JWT creation with 24h expiry
+- decode_access_token(token): JWT decoding
+- get_current_user(token): Dependency to get user from token
+- require_role(*roles): Dependency factory for role checking
+
+JWT CONFIG:
+- Algorithm: HS256
+- Expiry: 24 hours
+- Secret: From environment or default
+
+9.3 WEBSOCKET MANAGER (websocket_manager.py)
+---------------------------------------------
+
+CLASS: ConnectionManager
+
+STORAGE:
+- active_connections: { user_id: { ws: WebSocket, role: string } }
+
+METHODS:
+- connect(ws, user_id, role): Accept and store connection
+- disconnect(ws, user_id): Remove connection
+- broadcast_alert(alert_data, target_roles): Send to matching roles
+- broadcast_reaction(reaction_data): Send to all
+- broadcast_alert_deletion(alert_id): Send to all
+- broadcast_acknowledgment(ack_data): Send to all
+- get_active_users_count(): Return connection count
+
+ROLE TARGETING:
+- Normalizes 'students' → 'student'
+- If 'all' in target_roles: broadcast to everyone
+- Otherwise: filter by user role match
+
+9.4 API ROUTES
+---------------
+
+/api/auth/login (main.py):
+- POST: Login with rate limit (5/minute)
+- Checks is_active, is_approved
+- Logs activity
+- Returns token + user + first_login flag
+
+/api/auth/signup (main.py):
+- POST: Signup with rate limit (3/minute)
+- Only faculty/student roles allowed
+- Creates with is_approved=False
+- Returns pending_approval message
+
+/api/alerts (routes/alerts.py):
+- POST: Create alert (admin/faculty)
+  - Validates target_roles based on sender role
+  - Broadcasts via WebSocket
+- GET: Fetch alerts with filters
+  - Filters by user role (students see student/all alerts)
+  - Includes reaction counts, ack counts
+- POST /bulk-delete: Delete multiple alerts
+- POST /bulk-restore: Restore deleted alerts
+- POST /{id}/view: Mark as viewed
+
+/api/reactions (routes/reactions.py):
+- POST: Add reaction
+- GET /alert/{id}: Get reactions for alert
+- Broadcasts reaction_update via WebSocket
+
+/api/acknowledgments (routes/acknowledgments.py):
+- POST /alert/{id}: Acknowledge alert
+- GET /alert/{id}: Get acknowledgments
+- Broadcasts acknowledgment_update via WebSocket
+
+/api/users (routes/users.py):
+- GET /me: Current user info
+- PUT /me: Update profile
+- GET /me/stats: User statistics
+
+/api/admin/users (routes/admin_users.py):
+- GET: List all users (super_admin)
+- POST: Create user
+- PUT /{id}: Update user
+- DELETE /{id}: Deactivate user
+- POST /{id}/reset-password: Reset password
+
+/api/admin/pending-users (routes/pending_users.py):
+- GET: List pending approvals
+- POST /{id}/approve: Approve user
+- POST /{id}/reject: Reject user
+
+/api/templates (routes/templates.py):
+- CRUD for alert templates
+
+/api/preferences (routes/preferences.py):
+- GET/PUT user notification preferences
+
+/api/analytics (routes/analytics.py):
+- GET /dashboard: User's analytics
+- GET /alert/{id}: Alert-specific analytics
+
+/api/admin/analytics (routes/admin_analytics.py):
+- GET: System-wide analytics (super_admin)
+
+/api/badges (routes/badges.py):
+- GET: User's badges
+- POST /mark-seen: Mark badges as not new
+
+/api/timeline (routes/timeline.py):
+- GET /alert/{id}: Alert incident timeline
+
+/api/settings/sync (routes/settings_sync.py):
+- GET: Fetch user settings
+- POST: Save user settings
+
+9.5 RATE LIMITING
+------------------
+
+Configured via SlowAPI:
+- Login: 5/minute
+- Signup: 3/minute
+- Alert creation: 10/minute
+
+================================================================================
+10. ACCESS CONTROL (ROLE-BASED PERMISSIONS)
+================================================================================
+
+10.1 ROLE HIERARCHY
+--------------------
+
+1. SUPER_ADMIN
+   - All permissions
+   - Can manage all users
+   - Can approve/reject signups
+   - Can send alerts to all groups
+   - Can view all analytics
+   - Can access Control Center
+
+2. COLLEGE_ADMIN
+   - Can create alerts for faculty/students
+   - Can send to "all"
+   - Limited user management
+   - Can view faculty/student analytics
+
+3. FACULTY
+   - Can create alerts for students only
+   - Cannot send to "all" or other faculty
+   - Can view timeline for own alerts
+
+4. STUDENT
+   - Can view alerts
+   - Can react to alerts
+   - Can acknowledge emergency alerts
+   - Cannot create alerts
+
+10.2 FRONTEND ROUTE GUARDS
+---------------------------
+
+Public Routes:
+- / (Welcome)
+- /login
+- /signup
+
+Protected Routes (any authenticated user):
+- /dashboard
+- /history
+- /analytics
+- /profile
+- /settings
+
+Admin Routes (super_admin only):
+- /admin/users
+- /admin/pending-users
+- /admin/control-center
+
+Create Alert (admin + faculty):
+- /create-alert (super_admin, college_admin, faculty)
+
+10.3 ALERT TARGETING VALIDATION
+--------------------------------
+
+validate_target_roles(sender_role, target_roles):
+
+SUPER_ADMIN:
+- Can target: student, faculty, college_admin, all
+
+COLLEGE_ADMIN:
+- Can target: student, faculty, all
+- Cannot target: super_admin
+
+FACULTY:
+- Can target: student only
+- Cannot target: all, faculty
+
+================================================================================
+11. END-TO-END FLOWS
+================================================================================
+
+11.1 USER SIGNUP → APPROVAL → LOGIN
+-------------------------------------
+
+1. User visits /signup
+2. Fills form: full_name, username, password, role (faculty/student)
+3. POST /api/auth/signup
+4. Server creates user with is_approved=False
+5. Response: "pending_approval" status
+6. User sees "awaiting approval" message
+
+7. Admin visits /admin/pending-users
+8. Views list of pending users
+9. Clicks Approve/Reject
+10. POST /api/admin/pending-users/{id}/approve
+11. Server sets is_approved=True
+
+12. User visits /login
+13. Enters credentials
+14. POST /api/auth/login
+15. Server validates, creates JWT
+16. Response: { access_token, user, first_login }
+17. Frontend stores token, connects WebSocket
+18. If first_login: OnboardingModal appears
+
+11.2 ALERT CREATION → BROADCAST → DELIVERY
+--------------------------------------------
+
+1. Admin/Faculty visits /create-alert
+2. Fills form: title, message, priority, category
+3. Selects target: All Users / Students Only / Faculty Only
+4. Clicks "Broadcast Alert"
+5. POST /api/alerts with { title, message, priority, category, target_roles }
+
+6. Server validates sender role vs target_roles
+7. Creates Alert record in database
+8. Prepares alert_data JSON
+9. Calls ws_manager.broadcast_alert(alert_data, target_roles)
+
+10. WebSocket manager iterates connections
+11. For each connection, checks if user.role in target_roles
+12. If match: sends { type: "new_alert", alert: {...} }
+
+13. Frontend WebSocket listener receives message
+14. alertStore.addAlert() called
+15. Alert added to alerts[] and queuedAlerts[]
+16. Dashboard re-renders with new alert
+17. Notification toast appears
+18. Confetti animation (if enabled)
+
+11.3 SETTINGS MODIFICATION → PERSISTENCE → SYNC
+-------------------------------------------------
+
+1. User opens /settings
+2. Toggles "Cursor Gravity" switch
+3. settingsStore.updateSetting('cursorGravity', false)
+4. State updated, component re-renders
+5. saveToLocalStorage() called
+6. If isLoggedIn: debounced syncToServer() called (1s delay)
+
+7. POST /api/settings/sync/ with settings JSON
+8. Server stores in user.settings_json
+
+9. On another device, user logs in
+10. initSettings(true) called
+11. syncFromServer() fetches settings
+12. GET /api/settings/sync/
+13. Server returns settings JSON
+14. Settings applied to store
+15. UI reflects synced settings
+
+================================================================================
+12. MICRO-DETAILS CATALOG
+================================================================================
+
+12.1 SHADOW LEVELS
+-------------------
+
+Light Theme:
+- shadow-xs: 0 1px 2px rgba(0,0,0,0.04)
+- shadow-sm: 0 2px 4px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.02)
+- shadow-md: 0 4px 8px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.04)
+- shadow-lg: 0 8px 16px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.04)
+- shadow-xl: 0 12px 24px rgba(0,0,0,0.10), 0 8px 16px rgba(0,0,0,0.06)
+
+Dark Theme:
+- shadow-sm: 0 2px 4px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.02)
+- shadow-lg: 0 6px 16px rgba(0,0,0,0.5), 0 0 0 1px rgba(255,255,255,0.04)
+- Neon glow added on hover
+
+12.2 BLUR STRENGTHS
+--------------------
+
+- Standard nav: 16px
+- Heavy modal: 24px
+- Glass panels: 32px
+- VisionOS surfaces: 40px
+
+12.3 OPACITY LEVELS
+--------------------
+
+- Hover background: 0.08
+- Disabled elements: 0.35 (dark), 0.5 (light)
+- Overlay dark: 0.75
+- Overlay light: 0.5
+- Glass surfaces: 0.18-0.60
+
+12.4 BUTTON GRADIENTS
+----------------------
+
+Primary button (light):
+- linear-gradient(135deg, #a855f7 0%, #8b5cf6 100%)
+- shadow: 0 4px 12px rgba(168, 85, 247, 0.35)
+
+Primary button (dark):
+- linear-gradient(135deg, #7A5CFF 0%, #6B4FE0 100%)
+- shadow: 0 4px 16px rgba(122, 92, 255, 0.35)
+
+12.5 INPUT FOCUS RINGS
+-----------------------
+
+Light:
+- border: rgba(168, 85, 247, 0.3)
+- box-shadow: 0 0 0 3px rgba(168, 85, 247, 0.12)
+
+Dark:
+- border: rgba(122, 92, 255, 0.5)
+- box-shadow: 0 0 0 3px rgba(122, 92, 255, 0.15), 0 0 20px rgba(122, 92, 255, 0.1)
+
+12.6 SPACING PATTERNS
+----------------------
+
+- Card padding: 16-24px (p-4 to p-6)
+- Section gaps: 24-32px (gap-6 to gap-8)
+- Component margins: 16px (mb-4)
+- Icon-text gaps: 8-12px (gap-2 to gap-3)
+
+12.7 BORDER RADII
+------------------
+
+- Buttons: 12px (rounded-xl)
+- Cards: 16-24px (rounded-2xl to rounded-3xl)
+- Inputs: 12px (rounded-xl)
+- Avatars: 9999px (rounded-full)
+- Badges: 9999px (rounded-full)
+
+12.8 SOUND PROFILES
+--------------------
+
+Water style: frequencies [600, 400, 500], sine wave, 0.12s
+Digital style: frequencies [880, 660, 770], square wave, 0.08s
+Glass style: frequencies [1200, 900, 1050], sine wave, 0.1s
+Click style: frequencies [400, 300, 350], triangle wave, 0.05s
+
+12.9 HAPTIC FEEDBACK
+---------------------
+
+Light: 10ms vibration
+Medium: 25ms vibration
+Heavy: 50ms vibration
+
+12.10 FILE-BY-FILE BEHAVIORS
+-----------------------------
+
+Welcome.jsx (54KB):
+- Theme selector with 6 preset themes
+- Animated logo with spring effect
+- Enter button with magnetic hover
+- Rotating word carousel
+- Particle color syncs with theme
+
+Login.jsx (41KB):
+- Form validation with error messages
+- Show/hide password toggle
+- Remember me checkbox
+- Pending approval handling
+- Login sound on success
+
+Dashboard.jsx (31KB):
+- Real-time alert feed
+- Search and filter bar
+- Stat cards with counts
+- Emergency mode activation
+- Split view toggle
+
+Settings.jsx (71KB):
+- 30+ configurable options
+- Theme preview with live updates
+- Export/import settings
+- Cloud sync status indicator
+- Reset confirmation modal
+
+CreateAlert.jsx (16KB):
+- Rich text editor for message
+- Template selector
+- Target role selection
+- Priority and category pickers
+- Confetti on success
+- Form reset for multiple sends
+
+================================================================================
+END OF DOCUMENTATION
+================================================================================
+
+This document was auto-generated by analyzing the complete PulseArc codebase.
+For updates, re-run the documentation generator against the latest source.
+
+Version: 2.0.0
+Generated: 2025-12-07
+Line count: ~1300 lines
+Character count: ~50,000 characters
