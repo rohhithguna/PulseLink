@@ -38,7 +38,7 @@ def create_admin_user():
             password_hash=get_password_hash("admin123"),  # Change this password!
             email="admin@pulselink.com",
             full_name="System Administrator",
-            role=UserRole.ADMIN,
+            role=UserRole.SUPER_ADMIN,
             is_active=True,
             is_approved=True,
             first_login=False,

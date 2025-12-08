@@ -38,14 +38,14 @@ async def startup():
     db = SessionLocal()
     try:
         from auth import get_password_hash
-        admin = db.query(User).filter(User.role == UserRole.ADMIN).first()
+        admin = db.query(User).filter(User.role == UserRole.SUPER_ADMIN).first()
         if not admin:
             admin = User(
                 username="admin",
                 password_hash=get_password_hash("admin123"),
                 email="admin@pulselink.com",
                 full_name="System Administrator",
-                role=UserRole.ADMIN,
+                role=UserRole.SUPER_ADMIN,
                 is_active=True,
                 is_approved=True,
                 first_login=False,
