@@ -26,7 +26,7 @@ class WebSocketService {
         }
 
         this.isConnecting = true;
-        const wsUrl = `ws://localhost:8000/ws/${user.id}?token=${token}`;
+        const wsUrl = `wss://pulselink-k3k9.onrender.com/ws/${user.id}?token=${token}`;
 
         try {
             this.ws = new WebSocket(wsUrl);

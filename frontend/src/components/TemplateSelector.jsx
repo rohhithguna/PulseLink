@@ -13,7 +13,7 @@ const TemplateSelector = ({ onSelectTemplate }) => {
     const fetchTemplates = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:8000/api/templates', {
+            const response = await axios.get('https://pulselink-k3k9.onrender.com/api/templates', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setTemplates(response.data);

@@ -30,10 +30,10 @@ const AlertCard = ({ alert, selectable = false, isSelected = false, onSelect }) 
     const [showTimeline, setShowTimeline] = useState(false);
     const [reactionAnimating, setReactionAnimating] = useState(null);
 
-    
+
     const ackCount = alert.acknowledgment_count || 0;
 
-    
+
     const canViewTimeline = hasRole(['super_admin', 'college_admin', 'faculty']);
 
     const getPriorityClass = (priority) => {
@@ -57,7 +57,7 @@ const AlertCard = ({ alert, selectable = false, isSelected = false, onSelect }) 
     };
 
     const handleReaction = async (emoji) => {
-        
+
         setReactionAnimating(emoji);
         playUISound('tap');
         triggerHaptic('light');
@@ -65,21 +65,21 @@ const AlertCard = ({ alert, selectable = false, isSelected = false, onSelect }) 
         await addReaction(alert.id, emoji);
         setShowReactions(false);
 
-        
+
         setTimeout(() => setReactionAnimating(null), 400);
     };
 
     const handleAcknowledge = async (e) => {
         e.stopPropagation();
-        if (acknowledged) return; 
+        if (acknowledged) return;
 
         try {
             const token = localStorage.getItem('token');
-            await axios.post(`http://localhost:8000/api/acknowledgments/alert/${alert.id}`, {}, {
+            await axios.post(`https://pulselink-k3k9.onrender.com/api/acknowledgments/alert/${alert.id}`, {}, {
                 headers: { Authorization: `Bearer ${token}` }
             });
 
-            
+
             setAcknowledged(true);
         } catch (error) {
             console.error('Error acknowledging:', error);
@@ -102,7 +102,7 @@ const AlertCard = ({ alert, selectable = false, isSelected = false, onSelect }) 
 
     return (
         <div className="relative">
-            {}
+            { }
             {isEmergency && (
                 <motion.div
                     className="absolute inset-0 bg-red-500/20 rounded-3xl -z-10"
@@ -119,7 +119,7 @@ const AlertCard = ({ alert, selectable = false, isSelected = false, onSelect }) 
             )}
             <Card className={`${getPriorityClass(alert.priority)} overflow-hidden mb-4 ${isSelected ? 'ring-2 ring-red-500' : ''}`}>
                 <div className="flex items-start gap-4">
-                    {}
+                    { }
                     {selectable && (
                         <div className="flex-shrink-0 pt-1">
                             <input
@@ -134,12 +134,12 @@ const AlertCard = ({ alert, selectable = false, isSelected = false, onSelect }) 
                         </div>
                     )}
 
-                    {}
+                    { }
                     <div className="flex-shrink-0 text-3xl">
                         {getPriorityIcon(alert.priority)}
                     </div>
 
-                    {}
+                    { }
                     <div className="flex-1 min-w-0">
                         <div className="flex justify-between items-start mb-1.5">
                             <h3 className="text-lg font-semibold" style={{ color: '#111827' }}>
@@ -165,7 +165,7 @@ const AlertCard = ({ alert, selectable = false, isSelected = false, onSelect }) 
                             </div>
                         )}
 
-                        {}
+                        { }
                         <div className="flex items-center gap-2 mb-2">
                             {alert.reaction_counts && Object.entries(alert.reaction_counts).map(([emoji, count]) => (
                                 <span key={emoji} className="text-sm">
@@ -194,7 +194,7 @@ const AlertCard = ({ alert, selectable = false, isSelected = false, onSelect }) 
                             </div>
                         )}
 
-                        {}
+                        { }
                         {alert.priority === 'emergency' && (
                             <button
                                 onClick={handleAcknowledge}
@@ -217,7 +217,7 @@ const AlertCard = ({ alert, selectable = false, isSelected = false, onSelect }) 
                             </button>
                         )}
 
-                        {}
+                        { }
                         {canViewTimeline && (
                             <motion.button
                                 whileHover={{ scale: 1.02 }}
@@ -235,7 +235,7 @@ const AlertCard = ({ alert, selectable = false, isSelected = false, onSelect }) 
                 </div>
             </Card>
 
-            {}
+            { }
             <IncidentTimeline
                 alertId={alert.id}
                 isOpen={showTimeline}

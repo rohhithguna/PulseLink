@@ -22,7 +22,7 @@ const PreferencesPanel = () => {
     const fetchPreferences = async () => {
         try {
             const token = localStorage.getItem('token');
-            const response = await axios.get('http://localhost:8000/api/preferences', {
+            const response = await axios.get('https://pulselink-k3k9.onrender.com/api/preferences', {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setPreferences(response.data);
@@ -38,7 +38,7 @@ const PreferencesPanel = () => {
         setMessage('');
         try {
             const token = localStorage.getItem('token');
-            await axios.put('http://localhost:8000/api/preferences', preferences, {
+            await axios.put('https://pulselink-k3k9.onrender.com/api/preferences', preferences, {
                 headers: { Authorization: `Bearer ${token}` }
             });
             setMessage('✅ Preferences saved successfully!');
@@ -59,7 +59,7 @@ const PreferencesPanel = () => {
         <div className="bg-white rounded-lg shadow p-6">
             <h3 className="text-lg font-bold mb-4">Notification Preferences</h3>
 
-            {}
+            { }
             <div className="space-y-3 mb-6">
                 <h4 className="font-medium text-gray-700">Mute Alerts by Priority</h4>
 
@@ -81,7 +81,7 @@ const PreferencesPanel = () => {
                 ))}
             </div>
 
-            {}
+            { }
             <div className="border-t pt-4">
                 <label className="flex items-center justify-between mb-3 cursor-pointer">
                     <span className="font-medium text-gray-700">🌙 Quiet Hours</span>
@@ -117,7 +117,7 @@ const PreferencesPanel = () => {
                 )}
             </div>
 
-            {}
+            { }
             <div className="mt-6">
                 <button
                     onClick={handleSave}
