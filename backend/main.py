@@ -33,6 +33,31 @@ app.add_middleware(
 async def startup():
     init_db()
     print("Database initialized")
+    
+    # Auto-create admin user if none exists
+    db = SessionLocal()
+    try:
+        from auth import get_password_hash
+        admin = db.query(User).filter(User.role == UserRole.ADMIN).first()
+        if not admin:
+            admin = User(
+                username="admin",
+                password_hash=get_password_hash("admin123"),
+                email="admin@pulselink.com",
+                full_name="System Administrator",
+                role=UserRole.ADMIN,
+                is_active=True,
+                is_approved=True,
+                first_login=False,
+                created_at=datetime.utcnow()
+            )
+            db.add(admin)
+            db.commit()
+            print("✅ Default admin user created (username: admin, password: admin123)")
+    except Exception as e:
+        print(f"Admin creation check: {e}")
+    finally:
+        db.close()
 
 app.include_router(alerts.router)
 app.include_router(reactions.router)

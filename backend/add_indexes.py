@@ -3,10 +3,10 @@ Migration script to add database indexes for improved performance.
 Run this script to update an existing database with new indexes.
 """
 from sqlalchemy import create_engine, text, inspect
-from database import SQLALCHEMY_DATABASE_URL
+from database import DATABASE_URL
 
 def add_indexes():
-    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    engine = create_engine(DATABASE_URL)
     inspector = inspect(engine)
     
     print("Adding database indexes...")

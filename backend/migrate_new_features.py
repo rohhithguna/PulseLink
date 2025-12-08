@@ -3,7 +3,7 @@ Migration script to add new features to PulseConnect database.
 This adds: Alert Categories, Acknowledgments, User Preferences, Templates, and Effectiveness Score.
 """
 from sqlalchemy import create_engine, text, inspect
-from database import SQLALCHEMY_DATABASE_URL, Base
+from database import DATABASE_URL, Base
 from models import (
     AlertAcknowledgment, UserPreferences, AlertTemplate,
     Alert, User, Reaction, AlertView
@@ -11,7 +11,7 @@ from models import (
 
 def migrate_database():
     print("🔧 Starting database migration for new features...")
-    engine = create_engine(SQLALCHEMY_DATABASE_URL)
+    engine = create_engine(DATABASE_URL)
     inspector = inspect(engine)
     
     existing_tables = inspector.get_table_names()
