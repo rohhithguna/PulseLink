@@ -10,9 +10,11 @@ load_dotenv()
 # Use DATABASE_URL from environment (for Render PostgreSQL) or fallback to SQLite
 DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./pulseconnect.db")
 
-# Handle Render's postgres:// URL format (SQLAlchemy requires postgresql://)
+# Handle Render's postgres:// URL format (SQLAlchemy + psycopg3 requires postgresql+psycopg://)
 if DATABASE_URL.startswith("postgres://"):
-    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql://", 1)
+    DATABASE_URL = DATABASE_URL.replace("postgres://", "postgresql+psycopg://", 1)
+elif DATABASE_URL.startswith("postgresql://") and "+psycopg" not in DATABASE_URL:
+    DATABASE_URL = DATABASE_URL.replace("postgresql://", "postgresql+psycopg://", 1)
 
 # SQLite requires special connect_args, PostgreSQL doesn't
 if DATABASE_URL.startswith("sqlite"):
